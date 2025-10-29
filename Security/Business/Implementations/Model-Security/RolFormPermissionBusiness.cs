@@ -1,7 +1,10 @@
-﻿using Business.Base;
+﻿using AutoMapper;
+using Business.Base;
 using Business.Interfaces.Model_Security;
 using Data.Interfaces.DataBasic;
 using Entity.Context;
+using Entity.Dto.Default;
+using Entity.Dto.Select;
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,14 +16,16 @@ using System.Threading.Tasks;
 
 namespace Business.Implementations.Model_Security
 {
-    public class RolFormPermissionBusiness : ABaseBusiness<RolFormPermission>, IRolFormPermissionBusiness
+    public class RolFormPermissionBusiness : ABaseBusiness<RolFormPermission,RolFormPermissionDto,RolFormPermissionSelectDto>, IRolFormPermissionBusiness
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public RolFormPermissionBusiness(IData<RolFormPermission> repository, ILogger<RolFormPermission> logger, ApplicationDbContext context)
-            : base(repository, logger)
+        public RolFormPermissionBusiness(IData<RolFormPermission> repository, ILogger<RolFormPermission> logger, ApplicationDbContext context, IMapper mapper)
+            : base(repository, logger, mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
     
     }

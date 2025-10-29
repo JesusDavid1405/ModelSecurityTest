@@ -1,4 +1,5 @@
-﻿using Business.Interfaces;
+﻿using AutoMapper;
+using Business.Interfaces;
 using Data.Interfaces.DataBasic;
 using Microsoft.Extensions.Logging;
 using System;
@@ -8,74 +9,80 @@ using Utilities.Exceptions;
 
 namespace Business.Base
 {
-    /// <summary>
-    /// Clase base genérica para la capa Business.
-    /// Implementa operaciones CRUD y manejo de excepciones.
-    /// </summary>
-    public abstract class ABaseBusiness<T> : IBaseBusiness<T> where T : class
+    public abstract class ABaseBusiness<TEntity, TDto, TDtoGet> : IBaseBusiness<TEntity, TDto, TDtoGet>
+        where TEntity : class
+        where TDto : class
+        where TDtoGet : class
     {
-        protected readonly IData<T> _repository;
-        protected readonly ILogger<T> _logger;
+        protected readonly IData<TEntity> _repository;
+        protected readonly ILogger<TEntity> _logger;
+        protected readonly IMapper _mapper;
 
-        protected ABaseBusiness(IData<T> repository, ILogger<T> logger)
+        protected ABaseBusiness(IData<TEntity> repository, ILogger<TEntity> logger, IMapper mapper)
         {
             _repository = repository;
             _logger = logger;
+            _mapper = mapper;
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<TDtoGet>> GetAllAsync()
         {
             try
             {
-                return await _repository.GetAllAsync();
+                var entities = await _repository.GetAllAsync();
+                return _mapper.Map<IEnumerable<TDtoGet>>(entities);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener registros de {Entity}", typeof(T).Name);
-                throw new BusinessException($"Error al obtener registros de {typeof(T).Name}", ex);
+                _logger.LogError(ex, "Error al obtener registros de {Entity}", typeof(TEntity).Name);
+                throw new BusinessException($"Error al obtener registros de {typeof(TEntity).Name}", ex);
             }
         }
 
-        public virtual async Task<T?> GetByIdAsync(int id)
+        public virtual async Task<TDtoGet?> GetByIdAsync(int id)
         {
             try
             {
                 var entity = await _repository.GetByIdAsync(id);
                 if (entity == null)
-                    throw new EntityNotFoundException(typeof(T).Name, id);
-                return entity;
+                    throw new EntityNotFoundException(typeof(TEntity).Name, id);
+
+                return _mapper.Map<TDtoGet>(entity);
             }
             catch (EntityNotFoundException) { throw; }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener {Entity} con ID {Id}", typeof(T).Name, id);
-                throw new BusinessException($"Error al obtener {typeof(T).Name} con ID {id}", ex);
+                _logger.LogError(ex, "Error al obtener {Entity} con ID {Id}", typeof(TEntity).Name, id);
+                throw new BusinessException($"Error al obtener {typeof(TEntity).Name} con ID {id}", ex);
             }
         }
 
-        public virtual async Task<T> CreateAsync(T entity)
+        public virtual async Task<TDto> CreateAsync(TDto dto)
         {
             try
             {
-                return await _repository.CreateAsync(entity);
+                var entity = _mapper.Map<TEntity>(dto);
+                var created = await _repository.CreateAsync(entity);
+                return _mapper.Map<TDto>(created);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al crear {Entity}", typeof(T).Name);
-                throw new BusinessException($"Error al crear {typeof(T).Name}", ex);
+                _logger.LogError(ex, "Error al crear {Entity}", typeof(TEntity).Name);
+                throw new BusinessException($"Error al crear {typeof(TEntity).Name}", ex);
             }
         }
 
-        public virtual async Task<bool> UpdateAsync(T entity)
+        public virtual async Task<bool> UpdateAsync(TDto dto)
         {
             try
             {
+                var entity = _mapper.Map<TEntity>(dto);
                 return await _repository.UpdateAsync(entity);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al actualizar {Entity}", typeof(T).Name);
-                throw new BusinessException($"Error al actualizar {typeof(T).Name}", ex);
+                _logger.LogError(ex, "Error al actualizar {Entity}", typeof(TEntity).Name);
+                throw new BusinessException($"Error al actualizar {typeof(TEntity).Name}", ex);
             }
         }
 
@@ -85,14 +92,14 @@ namespace Business.Base
             {
                 var result = await _repository.DeleteAsync(id);
                 if (!result)
-                    throw new EntityNotFoundException(typeof(T).Name, id);
+                    throw new EntityNotFoundException(typeof(TEntity).Name, id);
                 return result;
             }
             catch (EntityNotFoundException) { throw; }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al eliminar {Entity} con ID {Id}", typeof(T).Name, id);
-                throw new BusinessException($"Error al eliminar {typeof(T).Name} con ID {id}", ex);
+                _logger.LogError(ex, "Error al eliminar {Entity} con ID {Id}", typeof(TEntity).Name, id);
+                throw new BusinessException($"Error al eliminar {typeof(TEntity).Name} con ID {id}", ex);
             }
         }
     }

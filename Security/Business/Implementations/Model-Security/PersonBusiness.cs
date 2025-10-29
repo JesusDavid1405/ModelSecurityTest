@@ -1,7 +1,10 @@
-﻿using Business.Base;
+﻿using AutoMapper;
+using Business.Base;
 using Business.Interfaces.Model_Security;
 using Data.Interfaces.DataBasic;
 using Entity.Context;
+using Entity.Dto.Default;
+using Entity.Dto.Select;
 using Entity.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,15 +16,21 @@ using System.Threading.Tasks;
 
 namespace Business.Implementations.Model_Security
 {
-    public class PersonBusiness : ABaseBusiness<Person>, IPersonBusiness
+    public class PersonBusiness : ABaseBusiness<Person,PersonDto,PersonSelectDto>, IPersonBusiness
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public PersonBusiness(IData<Person> repository, ILogger<Person> logger, ApplicationDbContext context)
-            : base(repository, logger)
+        public PersonBusiness(
+            IData<Person> repository,
+            ILogger<Person> logger,
+            ApplicationDbContext context,
+            IMapper mapper)
+            : base(repository, logger, mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
-    
+
     }
 }

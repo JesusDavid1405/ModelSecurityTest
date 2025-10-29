@@ -23,7 +23,7 @@ namespace Business.Tests
                 .Options;
             _context = new DbContext(options);
 
-            //_business = new PermissionBusiness(_mockRepository.Object, _mockLogger.Object, _context);
+            _business = new PermissionBusiness(_mockRepository.Object, _mockLogger.Object, _context);
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace Business.Tests
         //{
         //    // Arrange
         //    _mockRepository.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((Permission)null);
-        
+
         //    // Act & Assert
         //    await Assert.ThrowsAsync<KeyNotFoundException>(() => _business.GetByIdAsync(99));
         //}

@@ -1,5 +1,7 @@
 ﻿using Business.Interfaces;
 using Entity.Dto.Default;
+using Entity.Dto.Select;
+using Entity.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Web.Controllers.Base;
@@ -7,13 +9,12 @@ using Web.Controllers.Base;
 namespace Web.Controllers.Module
 {
     [ApiController]
-    [Authorize]
     [Route("api/[controller]")]
     [Produces("application/json")]
 
-    public class UserController : BaseController<UserDto>
+    public class PersonController : BaseController<PersonDto,Person,PersonSelectDto>
     {
-        public UserController(IBaseBusiness<UserDto> service) : base(service)
+        public PersonController(IBaseBusiness<PersonDto, Person, PersonSelectDto> service) : base(service)
         {
         }
     }
